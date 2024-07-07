@@ -1,0 +1,520 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script>function neighbourhoodHighlight(params) {
+  // console.log("in nieghbourhoodhighlight");
+  allNodes = nodes.get({ returnType: "Object" });
+  // originalNodes = JSON.parse(JSON.stringify(allNodes));
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    highlightActive = true;
+    var i, j;
+    var selectedNode = params.nodes[0];
+    var degrees = 2;
+
+    // mark all nodes as hard to read.
+    for (let nodeId in allNodes) {
+      // nodeColors[nodeId] = allNodes[nodeId].color;
+      allNodes[nodeId].color = "rgba(200,200,200,0.5)";
+      if (allNodes[nodeId].hiddenLabel === undefined) {
+        allNodes[nodeId].hiddenLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+    var connectedNodes = network.getConnectedNodes(selectedNode);
+    var allConnectedNodes = [];
+
+    // get the second degree nodes
+    for (i = 1; i < degrees; i++) {
+      for (j = 0; j < connectedNodes.length; j++) {
+        allConnectedNodes = allConnectedNodes.concat(
+          network.getConnectedNodes(connectedNodes[j])
+        );
+      }
+    }
+
+    // all second degree nodes get a different color and their label back
+    for (i = 0; i < allConnectedNodes.length; i++) {
+      // allNodes[allConnectedNodes[i]].color = "pink";
+      allNodes[allConnectedNodes[i]].color = "rgba(150,150,150,0.75)";
+      if (allNodes[allConnectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[allConnectedNodes[i]].label =
+          allNodes[allConnectedNodes[i]].hiddenLabel;
+        allNodes[allConnectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // all first degree nodes get their own color and their label back
+    for (i = 0; i < connectedNodes.length; i++) {
+      // allNodes[connectedNodes[i]].color = undefined;
+      allNodes[connectedNodes[i]].color = nodeColors[connectedNodes[i]];
+      if (allNodes[connectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[connectedNodes[i]].label =
+          allNodes[connectedNodes[i]].hiddenLabel;
+        allNodes[connectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // the main node gets its own color and its label back.
+    // allNodes[selectedNode].color = undefined;
+    allNodes[selectedNode].color = nodeColors[selectedNode];
+    if (allNodes[selectedNode].hiddenLabel !== undefined) {
+      allNodes[selectedNode].label = allNodes[selectedNode].hiddenLabel;
+      allNodes[selectedNode].hiddenLabel = undefined;
+    }
+  } else if (highlightActive === true) {
+    // console.log("highlightActive was true");
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      // allNodes[nodeId].color = "purple";
+      allNodes[nodeId].color = nodeColors[nodeId];
+      // delete allNodes[nodeId].color;
+      if (allNodes[nodeId].hiddenLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].hiddenLabel;
+        allNodes[nodeId].hiddenLabel = undefined;
+      }
+    }
+    highlightActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    // console.log("Nothing was selected");
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        // allNodes[nodeId].color = {};
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function filterHighlight(params) {
+  allNodes = nodes.get({ returnType: "Object" });
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    filterActive = true;
+    let selectedNodes = params.nodes;
+
+    // hiding all nodes and saving the label
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = true;
+      if (allNodes[nodeId].savedLabel === undefined) {
+        allNodes[nodeId].savedLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+
+    for (let i=0; i < selectedNodes.length; i++) {
+      allNodes[selectedNodes[i]].hidden = false;
+      if (allNodes[selectedNodes[i]].savedLabel !== undefined) {
+        allNodes[selectedNodes[i]].label = allNodes[selectedNodes[i]].savedLabel;
+        allNodes[selectedNodes[i]].savedLabel = undefined;
+      }
+    }
+
+  } else if (filterActive === true) {
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = false;
+      if (allNodes[nodeId].savedLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].savedLabel;
+        allNodes[nodeId].savedLabel = undefined;
+      }
+    }
+    filterActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function selectNode(nodes) {
+  network.selectNodes(nodes);
+  neighbourhoodHighlight({ nodes: nodes });
+  return nodes;
+}
+
+function selectNodes(nodes) {
+  network.selectNodes(nodes);
+  filterHighlight({nodes: nodes});
+  return nodes;
+}
+
+function highlightFilter(filter) {
+  let selectedNodes = []
+  let selectedProp = filter['property']
+  if (filter['item'] === 'node') {
+    let allNodes = nodes.get({ returnType: "Object" });
+    for (let nodeId in allNodes) {
+      if (allNodes[nodeId][selectedProp] && filter['value'].includes((allNodes[nodeId][selectedProp]).toString())) {
+        selectedNodes.push(nodeId)
+      }
+    }
+  }
+  else if (filter['item'] === 'edge'){
+    let allEdges = edges.get({returnType: 'object'});
+    // check if the selected property exists for selected edge and select the nodes connected to the edge
+    for (let edge in allEdges) {
+      if (allEdges[edge][selectedProp] && filter['value'].includes((allEdges[edge][selectedProp]).toString())) {
+        selectedNodes.push(allEdges[edge]['from'])
+        selectedNodes.push(allEdges[edge]['to'])
+      }
+    }
+  }
+  selectNodes(selectedNodes)
+}</script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+            
+            
+            
+            
+            
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/css/tom-select.min.css" integrity="sha512-43fHB3GLgZfz8QXl1RPQ8O66oIgv3po9cJ5erMt1c4QISq9dYb195T3vr5ImnJPXuVroKcGBPXBFKETW8jrPNQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/js/tom-select.complete.js" integrity="sha512-jeF9CfnvzDiw9G9xiksVjxR2lib44Gnovvkv+3CgCG6NXCD4gqlA5nDAVW5WjpA+i+/zKsUWV5xNEbW1X/HH0Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 900px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+                <div id="select-menu" class="card-header">
+                    <div class="row no-gutters">
+                        <div class="col-10 pb-2">
+                            <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="selectNode([value]);"
+                            id="select-node"
+                            placeholder="Select node..."
+                            >
+                                <option selected>Select a Node by ID</option>
+                                
+                                    <option value="2020 united states presidential election">2020 united states presidential election</option>
+                                
+                                    <option value="donald trump's winred campaign">donald trump's winred campaign</option>
+                                
+                                    <option value="ftc">ftc</option>
+                                
+                                    <option value="agency">agency</option>
+                                
+                                    <option value="gdpr">gdpr</option>
+                                
+                                    <option value="consumer protection laws">consumer protection laws</option>
+                                
+                                    <option value="all companies">all companies</option>
+                                
+                                    <option value="dark patterns">dark patterns</option>
+                                
+                                    <option value="european union general data protection regulation (gdpr)">european union general data protection regulation (gdpr)</option>
+                                
+                                    <option value="australian competition and consumer commission">australian competition and consumer commission</option>
+                                
+                                    <option value="expedia group">expedia group</option>
+                                
+                                    <option value="bait-and-switch">bait-and-switch</option>
+                                
+                                    <option value="advertised product">advertised product</option>
+                                
+                                    <option value="businesses">businesses</option>
+                                
+                                    <option value="subscribers">subscribers</option>
+                                
+                                    <option value="california consumer privacy act">california consumer privacy act</option>
+                                
+                                    <option value="businesses in california">businesses in california</option>
+                                
+                                    <option value="deceptive user interfaces">deceptive user interfaces</option>
+                                
+                                    <option value="confirmshaming">confirmshaming</option>
+                                
+                                    <option value="email newsletter">email newsletter</option>
+                                
+                                    <option value="misdirection">misdirection</option>
+                                
+                                    <option value="dark pattern">dark pattern</option>
+                                
+                                    <option value="deceptive design pattern">deceptive design pattern</option>
+                                
+                                    <option value="data act">data act</option>
+                                
+                                    <option value="deceptive user interface designs">deceptive user interface designs</option>
+                                
+                                    <option value="digital services act">digital services act</option>
+                                
+                                    <option value="directive financial services contracts concluded at a distance">directive financial services contracts concluded at a distance</option>
+                                
+                                    <option value="european commission">european commission</option>
+                                
+                                    <option value="federal trade commission">federal trade commission</option>
+                                
+                                    <option value="ico">ico</option>
+                                
+                                    <option value="information transparency and clarity">information transparency and clarity</option>
+                                
+                                    <option value="norwegian consumer council">norwegian consumer council</option>
+                                
+                                    <option value="nudges">nudges</option>
+                                
+                                    <option value="research (2016 and 2017)">research (2016 and 2017)</option>
+                                
+                                    <option value="research (2019)">research (2019)</option>
+                                
+                                    <option value="research (april 2022)">research (april 2022)</option>
+                                
+                                    <option value="social media anti-privacy practices">social media anti-privacy practices</option>
+                                
+                                    <option value="tricking consumers">tricking consumers</option>
+                                
+                                    <option value="us law">us law</option>
+                                
+                                    <option value="don't not sell my personal information">don't not sell my personal information</option>
+                                
+                                    <option value="formally accepting an option">formally accepting an option</option>
+                                
+                                    <option value="epic games">epic games</option>
+                                
+                                    <option value="european data protection board">european data protection board</option>
+                                
+                                    <option value="fair processing">fair processing</option>
+                                
+                                    <option value="fareportal">fareportal</option>
+                                
+                                    <option value="new york attorney general">new york attorney general</option>
+                                
+                                    <option value="key requirements related to information transmission">key requirements related to information transmission</option>
+                                
+                                    <option value="ramping up enforcement against dark patterns">ramping up enforcement against dark patterns</option>
+                                
+                                    <option value="user's informed consent">user's informed consent</option>
+                                
+                                    <option value="i accept these terms">i accept these terms</option>
+                                
+                                    <option value="similar products">similar products</option>
+                                
+                                    <option value="unavailability">unavailability</option>
+                                
+                                    <option value="username and password">username and password</option>
+                                
+                                    <option value="privacy zuckering">privacy zuckering</option>
+                                
+                                    <option value="mark zuckerberg">mark zuckerberg</option>
+                                
+                                    <option value="user experience designer">user experience designer</option>
+                                
+                                    <option value="harry brignull">harry brignull</option>
+                                
+                            </select>
+                        </div>
+                        <div class="col-2 pb-2">
+                            <button type="button" class="btn btn-primary btn-block" onclick="neighbourhoodHighlight({nodes: []});">Reset Selection</button>
+                        </div>
+                    </div>
+                </div>
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+                  new TomSelect("#select-node",{
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      }
+                  });
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"group": 1, "id": "2020 united states presidential election", "label": "2020 united states presidential election", "shape": "dot", "size": 2}, {"group": 1, "id": "donald trump\u0027s winred campaign", "label": "donald trump\u0027s winred campaign", "shape": "dot", "size": 2}, {"group": 1, "id": "ftc", "label": "ftc", "shape": "dot", "size": 11}, {"group": 3, "id": "agency", "label": "agency", "shape": "dot", "size": 2}, {"group": 3, "id": "gdpr", "label": "gdpr", "shape": "dot", "size": 13}, {"group": 3, "id": "consumer protection laws", "label": "consumer protection laws", "shape": "dot", "size": 2}, {"group": 4, "id": "all companies", "label": "all companies", "shape": "dot", "size": 2}, {"group": 4, "id": "dark patterns", "label": "dark patterns", "shape": "dot", "size": 22}, {"group": 4, "id": "european union general data protection regulation (gdpr)", "label": "european union general data protection regulation (gdpr)", "shape": "dot", "size": 2}, {"group": 3, "id": "australian competition and consumer commission", "label": "australian competition and consumer commission", "shape": "dot", "size": 2}, {"group": 3, "id": "expedia group", "label": "expedia group", "shape": "dot", "size": 2}, {"group": 2, "id": "bait-and-switch", "label": "bait-and-switch", "shape": "dot", "size": 1}, {"group": 2, "id": "advertised product", "label": "advertised product", "shape": "dot", "size": 1}, {"group": 1, "id": "businesses", "label": "businesses", "shape": "dot", "size": 2}, {"group": 1, "id": "subscribers", "label": "subscribers", "shape": "dot", "size": 2}, {"group": 4, "id": "california consumer privacy act", "label": "california consumer privacy act", "shape": "dot", "size": 3}, {"group": 4, "id": "businesses in california", "label": "businesses in california", "shape": "dot", "size": 1}, {"group": 4, "id": "deceptive user interfaces", "label": "deceptive user interfaces", "shape": "dot", "size": 3}, {"group": 5, "id": "confirmshaming", "label": "confirmshaming", "shape": "dot", "size": 2}, {"group": 5, "id": "email newsletter", "label": "email newsletter", "shape": "dot", "size": 2}, {"group": 5, "id": "misdirection", "label": "misdirection", "shape": "dot", "size": 6}, {"group": 6, "id": "dark pattern", "label": "dark pattern", "shape": "dot", "size": 1}, {"group": 6, "id": "deceptive design pattern", "label": "deceptive design pattern", "shape": "dot", "size": 1}, {"group": 4, "id": "data act", "label": "data act", "shape": "dot", "size": 1}, {"group": 4, "id": "deceptive user interface designs", "label": "deceptive user interface designs", "shape": "dot", "size": 2}, {"group": 4, "id": "digital services act", "label": "digital services act", "shape": "dot", "size": 1}, {"group": 4, "id": "directive financial services contracts concluded at a distance", "label": "directive financial services contracts concluded at a distance", "shape": "dot", "size": 1}, {"group": 4, "id": "european commission", "label": "european commission", "shape": "dot", "size": 1}, {"group": 3, "id": "federal trade commission", "label": "federal trade commission", "shape": "dot", "size": 3}, {"group": 4, "id": "ico", "label": "ico", "shape": "dot", "size": 2}, {"group": 1, "id": "information transparency and clarity", "label": "information transparency and clarity", "shape": "dot", "size": 2}, {"group": 4, "id": "norwegian consumer council", "label": "norwegian consumer council", "shape": "dot", "size": 2}, {"group": 4, "id": "nudges", "label": "nudges", "shape": "dot", "size": 2}, {"group": 4, "id": "research (2016 and 2017)", "label": "research (2016 and 2017)", "shape": "dot", "size": 2}, {"group": 4, "id": "research (2019)", "label": "research (2019)", "shape": "dot", "size": 1}, {"group": 4, "id": "research (april 2022)", "label": "research (april 2022)", "shape": "dot", "size": 1}, {"group": 4, "id": "social media anti-privacy practices", "label": "social media anti-privacy practices", "shape": "dot", "size": 2}, {"group": 1, "id": "tricking consumers", "label": "tricking consumers", "shape": "dot", "size": 2}, {"group": 4, "id": "us law", "label": "us law", "shape": "dot", "size": 1}, {"group": 1, "id": "don\u0027t not sell my personal information", "label": "don\u0027t not sell my personal information", "shape": "dot", "size": 2}, {"group": 1, "id": "formally accepting an option", "label": "formally accepting an option", "shape": "dot", "size": 2}, {"group": 3, "id": "epic games", "label": "epic games", "shape": "dot", "size": 2}, {"group": 3, "id": "european data protection board", "label": "european data protection board", "shape": "dot", "size": 1}, {"group": 3, "id": "fair processing", "label": "fair processing", "shape": "dot", "size": 1}, {"group": 3, "id": "fareportal", "label": "fareportal", "shape": "dot", "size": 2}, {"group": 3, "id": "new york attorney general", "label": "new york attorney general", "shape": "dot", "size": 2}, {"group": 1, "id": "key requirements related to information transmission", "label": "key requirements related to information transmission", "shape": "dot", "size": 1}, {"group": 1, "id": "ramping up enforcement against dark patterns", "label": "ramping up enforcement against dark patterns", "shape": "dot", "size": 1}, {"group": 3, "id": "user\u0027s informed consent", "label": "user\u0027s informed consent", "shape": "dot", "size": 1}, {"group": 5, "id": "i accept these terms", "label": "i accept these terms", "shape": "dot", "size": 1}, {"group": 5, "id": "similar products", "label": "similar products", "shape": "dot", "size": 2}, {"group": 5, "id": "unavailability", "label": "unavailability", "shape": "dot", "size": 2}, {"group": 5, "id": "username and password", "label": "username and password", "shape": "dot", "size": 1}, {"group": 8, "id": "privacy zuckering", "label": "privacy zuckering", "shape": "dot", "size": 1}, {"group": 8, "id": "mark zuckerberg", "label": "mark zuckerberg", "shape": "dot", "size": 1}, {"group": 7, "id": "user experience designer", "label": "user experience designer", "shape": "dot", "size": 1}, {"group": 7, "id": "harry brignull", "label": "harry brignull", "shape": "dot", "size": 1}]);
+                  edges = new vis.DataSet([{"from": "2020 united states presidential election", "title": "During the 2020 United States presidential election, Donald Trump\u2019s WinRed campaign employed a similar dark pattern, pushing users towards committing to a recurring monthly donation.", "to": "donald trump\u0027s winred campaign", "width": 1.0}, {"from": "2020 united states presidential election", "title": "contextual proximity", "to": "ftc", "width": 0.5}, {"from": "agency", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "agency", "title": "While traversing through each sentence, Think about the key terms mentioned in it. Thought 1: While traversing through each sentence, Think about the key terms mentioned in it. Thought 2: Think about how these terms can have one on one relation with other terms. Thought 3: Find out the relation between each such related pair of terms.", "to": "consumer protection laws", "width": 1.0}, {"from": "all companies", "title": "contextual proximity", "to": "dark patterns", "width": 0.75}, {"from": "all companies", "title": "All companies must obtain unambiguous, freely-given consent from customers before they collect and use (\u2018process\u2019) their personally identifiable information under the European Union General Data Protection Regulation (GDPR).", "to": "european union general data protection regulation (gdpr)", "width": 1.0}, {"from": "australian competition and consumer commission", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "australian competition and consumer commission", "title": "In 2022, the Federal Court of Australia fined Expedia Group\u2019s Trivago A$44.7 million for misleading consumers into paying higher prices for hotel room bookings.", "to": "expedia group", "width": 1.0}, {"from": "bait-and-switch", "title": "Bait-and-switch patterns involve advertising a free or discounted product that is unavailable or stocked in small quantities. After announcing the product\u0027s unavailability, users are presented with similar products of higher prices or lesser quality.", "to": "advertised product", "width": 1.0}, {"from": "businesses", "title": "contextual proximity", "to": "ftc", "width": 0.5}, {"from": "businesses", "title": "Examples include businesses that require subscribers to print and mail their opt-out or cancellation request, which provides an easy path to get in but a di\ufb00icult path to get out.", "to": "subscribers", "width": 1.0}, {"from": "california consumer privacy act", "title": "The California Consumer Privacy Act limits the practice of Privacy Zuckering by businesses operating in California.", "to": "businesses in california", "width": 1.0}, {"from": "california consumer privacy act", "title": "contextual proximity", "to": "dark patterns", "width": 0.5}, {"from": "california consumer privacy act", "title": "In March 2021, California adopted amendments to the California Consumer Privacy Act which prohibits the use of deceptive user interfaces that have \u0027the substantial effect of subverting or impairing a consumer\u2019s choice to opt-out\u0027. This implies that there is a relationship between deceptive user interfaces and violation of the California Consumer Privacy Act.", "to": "deceptive user interfaces", "width": 1.0}, {"from": "confirmshaming", "title": "Confirmshaming uses shame to drive users to act. For example, when websites word an option to decline an email newsletter in a way that shames visitors into accepting.", "to": "email newsletter", "width": 1.0}, {"from": "confirmshaming", "title": "contextual proximity", "to": "misdirection", "width": 0.5}, {"from": "consumer protection laws", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "dark pattern", "title": "Both terms refer to user interface designs that manipulate users into taking unwanted actions, such as buying overpriced insurance or signing up for recurring bills. Harry Brignull coined the term \u0027dark patterns\u0027 in 2010 with the aim of naming and shaming deceptive user interfaces.", "to": "deceptive design pattern", "width": 1.0}, {"from": "dark patterns", "title": "In the context provided, it is mentioned that the Data Act is one of the three EU legislations that specifically deal with dark patterns. Therefore, we can infer that there exists a relationship between the Data Act and dark patterns.,contextual proximity", "to": "data act", "width": 1.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "deceptive user interface designs", "width": 0.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "deceptive user interfaces", "width": 1.25}, {"from": "dark patterns", "title": "Similar to the previous pair, it is stated in the context that the Digital Services Act is also among the three EU legislations addressing dark patterns. Thus, we can assume a relation between these two concepts.,contextual proximity", "to": "digital services act", "width": 1.75}, {"from": "dark patterns", "title": "As the context mentions that the directive financial services contracts concluded at a distance is another EU legislation that deals with dark patterns, there is a connection between these two entities.,contextual proximity", "to": "directive financial services contracts concluded at a distance", "width": 1.75}, {"from": "dark patterns", "title": "According to a report by the European Commission in 2022, 97% of the most popular websites and apps used by EU consumers deployed at least one dark pattern.,contextual proximity", "to": "european commission", "width": 1.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "european union general data protection regulation (gdpr)", "width": 0.75}, {"from": "dark patterns", "title": "In October 2021, the Federal Trade Commission issued an enforcement policy statement announcing a crackdown on businesses using dark patterns that \u0027trick or trap consumers into subscription services\u0027. This highlights a strong association between dark patterns and actions by the Federal Trade Commission.,contextual proximity", "to": "federal trade commission", "width": 1.5}, {"from": "dark patterns", "title": "contextual proximity", "to": "ftc", "width": 1.25}, {"from": "dark patterns", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "ico", "width": 0.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "information transparency and clarity", "width": 0.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "norwegian consumer council", "width": 0.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "nudges", "width": 0.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "research (2016 and 2017)", "width": 0.75}, {"from": "dark patterns", "title": "A 2019 study investigated practices on 11,000 shopping web sites and identified 1818 dark patterns in total, grouped into 15 categories.,contextual proximity", "to": "research (2019)", "width": 1.75}, {"from": "dark patterns", "title": "A study conducted in April 2022 found that dark patterns are still commonly used in the marketplace, highlighting a need for further scrutiny of such practices by the public, researchers, and regulators.,contextual proximity", "to": "research (april 2022)", "width": 1.75}, {"from": "dark patterns", "title": "contextual proximity", "to": "social media anti-privacy practices", "width": 0.75}, {"from": "dark patterns", "title": "Dark patterns are used to trick consumers into signing up for subscriptions or making it difficult to cancel. This can include examples like Roach motel designs, which provide an easy path to get in but a difficult path to get out, such as businesses requiring subscribers to print and mail their opt-out or cancellation request.", "to": "tricking consumers", "width": 1.0}, {"from": "dark patterns", "title": "contextual proximity", "to": "us law", "width": 0.5}, {"from": "deceptive user interface designs", "title": "In 2018 the Norwegian Consumer Council (Forbrukerr\u00e5det) published \u0027Deceived by Design,\u0027 a report on deceptive user interface designs of Facebook, Google and Microsoft.", "to": "norwegian consumer council", "width": 1.0}, {"from": "deceptive user interfaces", "title": "In a 2020 study, it was found that \u0027big tech\u0027 companies often used deceptive user interfaces to discourage their users from opting out of collecting and using personally identifiable information, which goes against the requirement of obtaining unambiguous, freely-given consent under the European Union General Data Protection Regulation (GDPR).", "to": "gdpr", "width": 1.0}, {"from": "don\u0027t not sell my personal information", "title": "Confusing wording may be used to trick users into formally accepting an option which they believe has the opposite meaning, such as a personal data processing consent button using a double-negative like \u0027don\u0027t not sell my personal information\u0027.", "to": "formally accepting an option", "width": 1.0}, {"from": "don\u0027t not sell my personal information", "title": "contextual proximity", "to": "ftc", "width": 0.5}, {"from": "donald trump\u0027s winred campaign", "title": "contextual proximity", "to": "ftc", "width": 0.5}, {"from": "email newsletter", "title": "contextual proximity", "to": "misdirection", "width": 0.5}, {"from": "epic games", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "epic games", "title": "In March 2023, the United States F federal T rade Commission fined F ortnite developer Epic Games $245 million for use of \u201ddark patterns to trick users into making purchases.", "to": "federal trade commission", "width": 1.0}, {"from": "european data protection board", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "expedia group", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "fair processing", "title": "The principle of fair processing laid down in Article 5 (1) (a) GDPR serves as a starting point to assess whether a design pattern actually constitutes a \u2019dark pattern\u2019 .,contextual proximity", "to": "gdpr", "width": 1.75}, {"from": "fareportal", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "fareportal", "title": "In 2022, New Y ork Attorney General Letitia James fined F areportal $2.6 million for using deceptive marketing tactics to sell airline tickets and hotel rooms.", "to": "new york attorney general", "width": 1.0}, {"from": "federal trade commission", "title": "contextual proximity", "to": "gdpr", "width": 0.75}, {"from": "formally accepting an option", "title": "contextual proximity", "to": "ftc", "width": 0.5}, {"from": "ftc", "title": "The FTC has stated key requirements related to information transparency and clarity in relation to cancelation.", "to": "information transparency and clarity", "width": 1.0}, {"from": "ftc", "title": "contextual proximity", "to": "key requirements related to information transmission", "width": 0.5}, {"from": "ftc", "title": "contextual proximity", "to": "ramping up enforcement against dark patterns", "width": 0.5}, {"from": "ftc", "title": "contextual proximity", "to": "subscribers", "width": 0.5}, {"from": "ftc", "title": "contextual proximity", "to": "tricking consumers", "width": 0.5}, {"from": "gdpr", "title": "contextual proximity", "to": "new york attorney general", "width": 0.75}, {"from": "gdpr", "title": "contextual proximity", "to": "user\u0027s informed consent", "width": 0.75}, {"from": "i accept these terms", "title": "Common in software installers, misdirection presents the user with a button in the fashion of a typical continuation button. A dark pattern would show a prominent \u2018I accept these terms\u2019 button asking the user to accept the terms of a program unrelated to the one they are trying to install.,contextual proximity", "to": "misdirection", "width": 1.5}, {"from": "ico", "title": "The proposed age-appropriate design code issued by the UK Information Commissioner\u2019s O\ufb00ice (ICO) prohibits using \u2019nudges\u2019 to draw users into options with low privacy settings, specifically when used by minors. Therefore, we can infer that ICO and nudges are related in this context.", "to": "nudges", "width": 1.0}, {"from": "misdirection", "title": "contextual proximity", "to": "similar products", "width": 0.5}, {"from": "misdirection", "title": "contextual proximity", "to": "unavailability", "width": 0.5}, {"from": "misdirection", "title": "contextual proximity", "to": "username and password", "width": 0.5}, {"from": "privacy zuckering", "title": "Privacy Zuckering refers to a practice of tricking users into sharing more information than they intend to. This is often accomplished through practices that obscure or delay the option to opt out of sharing private information, and is associated with Facebook CEO Mark Zuckerberg.", "to": "mark zuckerberg", "width": 1.0}, {"from": "research (2016 and 2017)", "title": "Research conducted in 2016 and 2017 documented social media anti-privacy practices using dark patterns.", "to": "social media anti-privacy practices", "width": 1.0}, {"from": "similar products", "title": "After announcing the product\u2019s unavailability , the page presents similar products of higher prices or lesser quality .", "to": "unavailability", "width": 1.0}, {"from": "user experience designer", "title": "Harry Brignull is a user experience designer who coined the term \u0027dark patterns\u0027 in 2010 to describe deceptive design patterns.", "to": "harry brignull", "width": 1.0}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "forceAtlas2Based": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.015,
+            "damping": 0.4,
+            "gravitationalConstant": -31,
+            "springConstant": 0.08,
+            "springLength": 100
+        },
+        "solver": "forceAtlas2Based",
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+                    network.on("selectNode", neighbourhoodHighlight);
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

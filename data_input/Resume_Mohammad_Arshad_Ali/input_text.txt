@@ -1,0 +1,75 @@
+Mohammad Arshad Ali
+Backend Developer • Machine Learning Engineer • Software Developer
+Keshav Memorial Institute of Technology (KMIT) • 2025 Pass out
+ • 
+ • 
+Skills
+C/C++ | Java | SQL | React.js | Flask | Django |
+Git | Linux | Problem Solving | Machine
+Learning
+Education
+Keshav Memorial Institute of Technology
+(KMIT), Hyderabad
+B.Tech, Computer Science Engineering (CSE)
+| 9.2 CGPA
+2021 - 2025
+Sri Chaitanya Junior college
+Class XII | 10 CGPA
+2021 - 2021
+Kendriya Vidyalaya AFS Bidar
+Class X | 10 CGPA
+2019 - 2019Work Experience
+Python Teaching Assistant @ , International
+Finishing School LA- KMIT, Hyderabad
+Feb 2022 - Mar 2022 (1 month) | Part-time
+•Interned with IFS-KMIT as a Python teaching assistant, providing
+valuable support and guidance to employees of a reputable Los
+Angeles based company.
+•Assisted people in learning and making projects in Python.
+•Interned with IFS-KMIT as a Python teaching assistant, providing
+valuable support and guidance to employees of a reputable Los
+Angeles based company.
+Skills Developed: Python, NumPy, Problem Solving
+Projects
+AI based Zero-Day attack Detection and
+Prevention
+•Provide a resilient defense against the dynamic threats of Cyber
+attacks by leveraging artificial intelligence
+•Created a cross-platform, electron-based desktop application with
+Python backend, to autonomously collect and monitor network
+flows in real-time, for detection and prevention of possible attacks.
+The application utilized multi-level ML algorithms, with an accuracy
+of 87% on real-world attacks (performed using Kali-Linux).
+•Real-Time Network Monitoring, Multi-Level ML Algorithms, Attack
+Detection and Prevention, User-Friendly Environment
+Skills Developed: ElectronJS, Python, Machine Learning, NodeJs,
+Cyber Security, HTML, CSS, Javascript
+Indoor Navigation in Museums
+•Design a mobile application to provide navigation in a museum
+•Developed a mobile application using React Native, Firebase, and
+SVGs. The app works on Android and IOS, and features interactive
+maps, captivating images, informative descriptions, and navigation
+implemented via Dijkstra's algorithm, fostering an immersive
+experience for museum visitors.
+•Interactive Maps with SVGs, Captivating Images and Descriptions,
+Navigation with Dijkstra's Algorithm, React Native Framework
+Skills Developed: React Native, SVG, Javascript, Firebase
+Achievements/ Extracurricular Activities
+•AWS DeepRacer Student's League | Semifinalist, AWS, Intel Certifications & Courses
+AI programming with Python
+•Mastered Essentials of AI: Programming tools
+(Python, NumPy, Pandas, Matplotlib, PyTorch),
+and deep learning (gradient descent,
+feedforward, backpropagation, Regularization).
+February 2023  | Certificate Link
+Research & Publication - AI in Defensive
+Cybersecurity
+•Co-authored a research paper (A Novel
+Approach to Zero-Day Attack Detection), with a
+focus on advanced Machine Learning methods
+for detection and prevention of Cyber attacks.
+September 2023•AWS AI/ML Scholar '22 | Awarded Scholarship, AWS
+•CodeKaze (Coding competition) | Top 5 in College, CodingNinjas
+•HackRevolution Hackathon | 2nd place Winner, Team Leader,
+ACES, MJCET
+•Hacktoberfest '23 | Hall of Fame status, DigitalOcean, on GitHub 

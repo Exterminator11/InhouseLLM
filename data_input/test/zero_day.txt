@@ -1,0 +1,38 @@
+ABSTRACT
+Zero-day network interruption assaults comprise a regular online protection danger, as they look to take advantage of the
+weaknesses of an organization framework. Zero-day attacks have always been a major contributor in data leaks which has led to
+loss of money, time, and resources. Our solution to detect and prevent such attacks is a desktop application that monitors your
+network traffic in real time and looks for any anomalies or malicious activity that may be happening and works to minimize the
+damage caused by prevention. Our Zero-day attack detection and prevention system is a software designed to protect the user’s
+machine from malicious connections and stop it if any are attempted. Our software utilizes a network flow collection tool called
+CIC Flowmeter to collect network flows from the user in real time. These flows are analyzed using a two layer approach.
+Protection is employed by blocking network port access for specific IP Addresses that have been flagged as malicious.
+
+Keywords: Zero day attacks, Attack detection, Machine Learning.
+1.Introduction
+In today’s ever-changing world, networks
+and digital systems have proliferated to every path of
+life. It has revolutionized how we live and conduct
+business, research and polity. However, growing with
+the advantages of seamless connectivity is the threat
+of mounting cyber attacks. With a large portion of our
+public and private data being hosted on digital
+technologies, protecting computer systems and
+networks from malicious attacks has become a critical
+concern in the current digital era. Cybercriminals,
+leveraging the power of the internet, are constantly
+searching for vulnerabilities in hardware and software
+that can be exploited to steal or corrupt data. Within
+the rapidly expanding cyber security landscape, the
+complexity and scale of cyber attacks has grown
+exponentially. Amongst these attacks the most
+challenging to counter is the zero-day attack. A zeroday attack occurs when criminals exploit unknown
+vulnerabilities in hardware or software, unbeknownst
+to manufacturers. Akin to being caught unawares, this
+means that there are no defenses or safeguards to
+prevent these assaults. Zero-day attacks are
+particularly tricky to deal with, as they catch
+organizations off guard. This leaves developers with
+little time to identify and mitigate the damage. If
+undetected, this attack may inflict irreparable damage
+to essential system architecture.
